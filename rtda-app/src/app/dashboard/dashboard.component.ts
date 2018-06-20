@@ -49,6 +49,70 @@ export class DashboardComponent {
     });
 
   }
+  
+  getZone() {
+    this._dsServie.getZoneTagTs(this.lastTs)
+      .subscribe(
+        result => {
+          // console.log('getZone success');
+          // this.lineX = ["2018-06-08 09:43:55", "2018-06-08 10:05:58", "2018-06-08 11:43:58", "2018-06-08 12:43:48", "2018-06-08 01:44:00"];
+          // this.lineY = [-1, -1, 0, 1, 0];
+          // this.zoneTag1=result;
+          this.zoneTag=result.sort(function(a,b){
+            if ( a.ts < b.ts ){
+              return -1;
+            }else if( a.ts > b.ts ){
+                return 1;
+            }else{
+              return 0;	
+            }
+          });
+          result.forEach(entry =>{                        
+              this.lineX.push(entry.ts_gmt); 
+              this.lineY.push(entry.value);         
+          });
+          // to find max timestamp from result
+          let maxValue = Math.max.apply(Math,result.map(function(o){return o.ts;}));
+          // console.log("last ts: "+this.lastTs); 
+          // console.log("max ts: "+maxValue+maxValue.length);      
+          // this.lastTsObj = result.filter(function(o) { return o.ts === maxValue; })[0];
+
+          if((this.lastTs==-1 && maxValue!='-Infinity') ||(this.lastTs< maxValue) ){
+            console.log("Last ts: "+this.lastTs); 
+            console.log("Current ts: "+maxValue); 
+            this.lastTs=maxValue;            
+            this.lineChart(); // assign zone data to the line chart
+          }
+          else {
+            if(this.lastTs==-1 ){
+              this.lastTs=-1; 
+            }     
+          }
+        },
+        err => {
+          console.log("getZone failed from component");
+        },
+        () => {
+          // console.log('getZone finished');
+        });
+  }
+
+  updateLineChart() {
+    this.lineX.splice(0,2);
+    this.lineY.splice(0,2);
+    // this.lineX.push("2018-06-08 01:44:00");this.lineY.push(1);
+    // this.lineChart();
+    this.getZone();
+  }
+
+  lineChart() {    
+    // this.islineChart = false;
+    // console.log(this.lineX);console.log(this.lineY);
+    this.lineChartData = [{ data: this.lineY, label: 'Series A', fill: false }];
+    this.lineChartLabels = this.lineX;
+    this.islineChart = true;
+  }
+
   initializeWebSocketConnection() {
     let ws = new SockJS(this.serverUrl);
     this.stompClient = Stomp.over(ws);
@@ -65,66 +129,6 @@ export class DashboardComponent {
       }
     );
   }
-
-
-  getZone() {
-    this._dsServie.getZoneTagTs(this.lastTs)
-      .subscribe(
-        result => {
-          console.log('getZone success');
-          // this.lineX = ["2018-06-08 09:43:55", "2018-06-08 10:05:58", "2018-06-08 11:43:58", "2018-06-08 12:43:48", "2018-06-08 01:44:00"];
-          // this.lineY = [-1, -1, 0, 1, 0];
-          // this.zoneTag1=result;
-          this.zoneTag=result.sort(function(a,b){
-            if ( a.ts < b.ts ){
-              return -1;
-            }else if( a.ts > b.ts ){
-                return 1;
-            }else{
-              return 0;	
-            }
-          });
-          // console.log(this.zoneTag1);
-          // console.log(this.zoneTag);
-          result.forEach(entry =>{                        
-              this.lineX.push(entry.ts_gmt); 
-              this.lineY.push(entry.value);         
-          });
-          // this.lineX1 = this.lineX;
-          // this.lineY1 = this.lineY;
-
-          // to find max timestamp from result
-          let maxValue = Math.max.apply(Math,result.map(function(o){return o.ts;})); 
-          console.log("max ts: "+maxValue);      
-          this.lastTsObj = result.filter(function(o) { return o.ts === maxValue; })[0];
-          this.lastTs=this.lastTsObj.ts;
-          console.log("last ts: "+this.lastTs);
-
-          this.lineChart(); // assign zone data to the line chart
-        },
-        err => {
-          console.log("getZone failed from component");
-        },
-        () => {
-          console.log('getZone finished');
-        });
-  }
-
-  updateLineChart() {
-    this.lineX.splice(0,1);
-    this.lineY.splice(0,1);
-    // this.lineX.push("2018-06-08 01:44:00");this.lineY.push(1);
-    // this.lineChart();
-    this.getZone();
-  }
-  lineChart() {    
-    this.islineChart = false;
-    console.log(this.lineX);console.log(this.lineY);
-    this.lineChartData = [{ data: this.lineY, label: 'Series A', fill: false }];
-    this.lineChartLabels = this.lineX;
-    this.islineChart = true;
-  }
-
   connect() {
     //connect to stomp where stomp endpoint is exposed
     //let ws = new SockJS(http://localhost:8080/greeting);
