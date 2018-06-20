@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "rtda-app"
+		},
+		{
+			"path": "rtda-socket-service"
+		}
+	],
+	"settings": {}
+}
