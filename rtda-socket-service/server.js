@@ -24,10 +24,11 @@ http.listen(8091, () => {
 // data handler function can return a Promise 
 	var dataHandler = function (messageSet, topic, partition) {
 		messageSet.forEach(function (m) {
-			console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
+			// console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
 			// if(topic=="JJV-JAX-Manuf-3GT-T04-Uptime")
 			// {
-				io.emit('message', {x:(new Date()).getTime(), y: m.message.value.toString('utf8')});
+				// console.log({data:m.message.value.toString('utf8')})
+				io.emit('message',{data:m.message.value.toString('utf8')});
 			// }
 			// else
 			// {
@@ -44,7 +45,7 @@ http.listen(8091, () => {
 		// arr.push([v1,v2]);
 		var arr=[];
 		arr.push([v1]);
-		console.log("val:"+arr);
+		// console.log("val:"+arr);
 		return arr;		
 	});
 });
